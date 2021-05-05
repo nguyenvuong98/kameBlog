@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8888;
 const kameQuestionPresenter = require('./presenter/kameQuestion.presenter');
-let bodyParser = require('body-parser')
+let bodyParser = require('body-parser');
+
+app.set('views', 'views');
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }))
  
 // parse application/json
@@ -43,7 +47,7 @@ app.get('/', async (req, res) => {
 app.post('/insert', async (req, res) => {
     try {
         let body = req.body;
-        let create = await kameQuestionPresenter.create(body);
+        let create = await kameQuestionPresenter.insertData(body);
         return res.status(200).json({status: true, data: create, message: 'success'});
     } catch (e) {
         return res.status(200).json({status: false, message: e.message});

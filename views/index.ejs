@@ -1,0 +1,175 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+    <title>Kame Blog</title>
+</head>
+<body>
+    <div class="container">
+        <p class="title">Kame Blog</p>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" id="input-search" placeholder="Tìm kiếm" class="form-control">
+                <button class="btn btn-success" id="search">Tìm kiếm</button>
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-warning" id="btn-add">Thêm câu hỏi mới</button>
+            </div>
+        </div>
+        <div class="row" id="area-insert">
+            <div class="col-md-5">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="text" id="input-question" class="form-control" placeholder="Nhập câu hỏi">
+                            </td>
+                            <td rowspan="2">
+                                <button class="btn btn-warning" id="add">Lưu</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" id="input-result" class="form-control" placeholder="Nhập câu trả lời">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <p class="title-2">Danh sách câu hỏi</p>
+            <div id="result"></div>
+        </div>
+        <div id="m-loading" style="text-align: center;
+        margin-top: 20px;">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p>Vui lòng chờ...</p>
+        </div>
+    </div>
+    <script>
+        const getData = (str) => {
+            $('#result').empty();
+            $('#m-loading').show();
+            let url = "/getData";
+            if (str) url += `?q=${str}`;
+
+            $.get(url, res => {
+                $('#m-loading').hide();
+                if (!res.status) {
+                    alert("Có lỗi xảy ra: ", res.message);
+                    return ;
+                }
+
+                if (res.data && res.data.length) {
+                    res.data.forEach((item, index) => {
+                        let child = `
+                            <div>
+                                <p>${index + 1}. Câu hỏi: ${item.question}</p>
+                                <div>
+                                    <span>Trả lời: <b>${item.result}</b><span>
+                                    <span class="ml-3"><span id="${item._id}like">${item.like}</span>&nbsp<i class="fa fa-thumbs-up" aria-hidden="true" onclick="like(${item._id},true)"></i></span>  
+                                    <span class="ml-3"><span id="${item._id}unlike">${item.unlike}</span>&nbsp<i class="fa fa-thumbs-down" aria-hidden="true" onclick="like(${item._id},false)"></i></span>  
+                                </div>
+                            </div>
+                        `;
+                        $('#result').appendChild(child);
+                    });
+                } else {
+                    $('#result').appendChild("<p>Dữ liệu trống</p>");
+                }
+            });
+        }
+
+        const insertData = () => {
+            $('#m-loading').show();
+            let question = $('#input-question').val();
+            let result = $('#input-result').val();
+            $.post('/insert', {question, result}, res => {
+                $('#m-loading').hide();
+
+                if (!res.status) {
+                    alert("Có lỗi xảy ra: ", res.message);
+                    return ;
+                }
+
+                $('#input-question').val("");
+                $('#input-result').val("");
+                getData();
+            });
+        }
+
+        const like = (id, like = false) => {
+            $('#m-loading').show();
+            if (!id) return;
+            let arrLike = localStorage.getItem('like');
+            let arr = arrLike ? JSON.parse(arrLike) : [];
+
+            let exists = arr.find(x => x == id);
+            let hasAction = exists ?? true;
+            $.post('/like', {id, hasAction, like}, res => {
+                $('#m-loading').hide();
+
+                if (!res.status) {
+                    alert("Có lỗi xảy ra: ", res.message);
+                    return ;
+                }
+
+                if (!exists) {
+                    arr.push(id);
+                    if (like) {
+                        $(`${id}like`).html(parseInt($(`${id}like`).html()) + 1);
+                    } else {
+                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                    }
+                } else {
+                    if (like) {
+                        $(`${id}like`).html(parseInt($(`${id}like`).html()) + 1);
+                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                    } else {
+                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                    }
+                }
+
+                localStorage.setItem('like', JSON.stringify(arr));
+
+                //getData();
+            });
+
+        }
+
+
+        $('document').ready(() => {
+            $('#area-insert').hide();
+            getData();
+
+            $('#search').click(() => {
+                let q = $('#input-search').val();
+                getData(q);
+            });
+
+            $('#input-search').keydown(e => {
+                if (e.which !== 13) return;
+                let q = $('#input-search').val();
+                getData(q);
+            });
+
+            $('#btn-add').click(() => {
+                $('#area-insert').toggle();
+                $('#btn-add').html() = $('#btn-add').html() == "Thêm câu hỏi mới" ? "Hủy" : "Thêm câu hỏi mới";
+            })
+
+            $('#add').click(() => {
+                insertData();
+            });
+        });
+    </script>
+</body>
+</html>
