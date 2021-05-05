@@ -4,13 +4,22 @@ const _ = require('lodash');
 class kameQuestionPresenter {
     static async getData(query) {
         let q = query && query.q ? query.q : false;
-        let query = {};
+        let obj = {};
         if (q) {
-            query.question = /q/;
-            query.question_tag = /q/;
+            obj["$or"] = [
+                {
+                    question: new RegExp(q, "i")
+                }, 
+                {
+                    question_tag: new RegExp(q, "i")
+                }
+            ]
+
+            
+            ;
         }
         
-        let process = await KameQuestionRepository.find(query);
+        let process = await KameQuestionRepository.find(obj);
         if (process && process.length) {
             process = _.orderBy(process, ['like'], ['desc']);
         }
@@ -26,7 +35,7 @@ class kameQuestionPresenter {
         let question_tag = change_alias(question);
         let created_time = Math.floor(new Date() / 1000);
         
-        let create = await KameQuestionRepository.create({question, question_tag, result, like: 0, unlike: 0, created_time});
+        let create = await KameQuestionRepository.insert({question, question_tag, result, like: 0, unlike: 0, created_time});
 
         return create;
     }
@@ -42,8 +51,8 @@ class kameQuestionPresenter {
         if (!record) throw new Error("record not found");
 
         if (hasAction) {
-            record.like = like ? record.like + 1 : (record.like <= 0 ? 0 : record.like - 1);
-            record.unlike = !like ? record.unlike + 1 : (record.unlike <= 0 ? 0 : record.unlike - 1);
+            record.like = like && like != 'false'? record.like + 1 : (record.like <= 0 ? 0 : record.like - 1);
+            record.unlike = !like || like == 'false' ? record.unlike + 1 : (record.unlike <= 0 ? 0 : record.unlike - 1);
         } else {
             record.like = like ? record.like + 1 : record.like;
             record.unlike = !like ? record.unlike + 1 : record.unlike;

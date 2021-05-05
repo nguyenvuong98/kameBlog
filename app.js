@@ -34,7 +34,10 @@ app.listen(port, () => {
     console.log(`Server listen on ${port} ...`);
 });
 
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
+    res.render('index');
+});
+app.get('/getData', async (req, res) => {
     try {
         let query = req.query;
         let process = await kameQuestionPresenter.getData(query);

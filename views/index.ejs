@@ -11,13 +11,15 @@
 </head>
 <body>
     <div class="container">
-        <p class="title">Kame Blog</p>
+        <h2 class="title">Kame Blog</h2>
         <div class="row">
             <div class="col-md-4">
                 <input type="text" id="input-search" placeholder="Tìm kiếm" class="form-control">
+            </div>
+            <div class="col-md-2">
                 <button class="btn btn-success" id="search">Tìm kiếm</button>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-2">
                 <button class="btn btn-warning" id="btn-add">Thêm câu hỏi mới</button>
             </div>
         </div>
@@ -42,7 +44,7 @@
                 </table>
             </div>
         </div>
-        <div>
+        <div class="mt-4">
             <p class="title-2">Danh sách câu hỏi</p>
             <div id="result"></div>
         </div>
@@ -71,19 +73,19 @@
                 if (res.data && res.data.length) {
                     res.data.forEach((item, index) => {
                         let child = `
-                            <div>
+                            <div class="mt-2">
                                 <p>${index + 1}. Câu hỏi: ${item.question}</p>
                                 <div>
                                     <span>Trả lời: <b>${item.result}</b><span>
-                                    <span class="ml-3"><span id="${item._id}like">${item.like}</span>&nbsp<i class="fa fa-thumbs-up" aria-hidden="true" onclick="like(${item._id},true)"></i></span>  
-                                    <span class="ml-3"><span id="${item._id}unlike">${item.unlike}</span>&nbsp<i class="fa fa-thumbs-down" aria-hidden="true" onclick="like(${item._id},false)"></i></span>  
+                                    <span class="ml-3"><span id="${item._id}like">${item.like}</span>&nbsp<i class="fa fa-thumbs-up" aria-hidden="true" onclick="like('${item._id}',true)"></i></span>  
+                                    <span class="ml-3"><span id="${item._id}unlike">${item.unlike}</span>&nbsp<i class="fa fa-thumbs-down" aria-hidden="true" onclick="like('${item._id}',false)"></i></span>  
                                 </div>
                             </div>
                         `;
-                        $('#result').appendChild(child);
+                        $('#result').append(child);
                     });
                 } else {
-                    $('#result').appendChild("<p>Dữ liệu trống</p>");
+                    $('#result').append("<p>Dữ liệu trống</p>");
                 }
             });
         }
@@ -106,7 +108,8 @@
             });
         }
 
-        const like = (id, like = false) => {
+        const like = (id, like ) => {
+            console.log('like')
             $('#m-loading').show();
             if (!id) return;
             let arrLike = localStorage.getItem('like');
