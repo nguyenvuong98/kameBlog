@@ -22,6 +22,9 @@
             <div class="col-md-2">
                 <button class="btn btn-warning" id="btn-add">Thêm câu hỏi mới</button>
             </div>
+            <div class="col-md-2">
+                <p>Lượt truy cập: <b id="view">0</b></p>
+            </div>
         </div>
         <div class="row" id="area-insert">
             <div class="col-md-5">
@@ -57,6 +60,16 @@
         </div>
     </div>
     <script>
+        const view = () => {
+            let name = "kame-blog";
+            $.get(`/view?name=${name}`, (res) => {
+                if (!res.status) {
+                    alert("Có lỗi xảy ra: ", res.message);
+                    return ;
+                }
+                $('#view').html(res.data.count);
+            });
+        }
         const getData = (str) => {
             $('#result').empty();
             $('#m-loading').show();
@@ -159,6 +172,7 @@
 
         $('document').ready(() => {
             $('#area-insert').hide();
+            view();
             getData();
 
             $('#search').click(() => {

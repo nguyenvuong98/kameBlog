@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 8888;
 const kameQuestionPresenter = require('./presenter/kameQuestion.presenter');
 let bodyParser = require('body-parser');
+const { query } = require('express');
 
 app.set('views', 'views');
 app.set('view engine', 'ejs');
@@ -62,6 +63,15 @@ app.post('/like', async (req, res) => {
         let body = req.body;
         let like = await kameQuestionPresenter.like(body);
         return res.status(200).json({status: true, data: like, message: 'success'});
+    } catch (e) {
+        return res.status(200).json({status: false, message: e.message});
+    }
+});
+
+app.get('/view', async (req, res) => {
+    try {
+        let view = await kameQuestionPresenter.view(req.query);
+        return res.status(200).json({status: true, data: view, message: 'success'});
     } catch (e) {
         return res.status(200).json({status: false, message: e.message});
     }

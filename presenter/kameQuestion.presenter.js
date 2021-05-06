@@ -1,4 +1,5 @@
 const KameQuestionRepository = require('../repository/kameQuestion.repository');
+const ViewRepository = require('../repository/view.repository');
 const _ = require('lodash');
 
 class kameQuestionPresenter {
@@ -61,6 +62,26 @@ class kameQuestionPresenter {
         await record.save();
 
         return record;
+    }
+
+    static async view(query) {
+        if (!query || !query.name) {
+            throw new Error("Missing information");
+        }
+        let name = query.name
+        let view = await ViewRepository.findOne({name});
+
+        if (!view) {
+            let newView = await ViewRepository.create({name, count: 1, updated_time: Math.floor(new Date() / 1000)});
+            return newView;
+        }
+
+        view.count = view.count ? view.count : 0;
+        view.count += 1;
+        view.updated_time = Math.floor(new Date() / 1000);
+        await view.save();
+
+        return view;
     }
 }
 
