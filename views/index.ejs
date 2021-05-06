@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="mt-4">
-            <p class="title-2">Danh sách câu hỏi</p>
+            <p class="title-2">Danh sách câu hỏi <b id="total">0</b></p>
             <div id="result"></div>
         </div>
         <div id="m-loading" style="text-align: center;
@@ -71,12 +71,13 @@
                 }
 
                 if (res.data && res.data.length) {
+                    $('#total').html(res.data.length);
                     res.data.forEach((item, index) => {
                         let child = `
                             <div class="mt-2">
                                 <p>${index + 1}. Câu hỏi: ${item.question}</p>
                                 <div>
-                                    <span>Trả lời: <b>${item.result}</b><span>
+                                    <span>Đáp án: <b>${item.result}</b><span>
                                     <span class="ml-3"><span id="${item._id}like">${item.like}</span>&nbsp<i class="fa fa-thumbs-up" aria-hidden="true" onclick="like('${item._id}',true)"></i></span>  
                                     <span class="ml-3"><span id="${item._id}unlike">${item.unlike}</span>&nbsp<i class="fa fa-thumbs-down" aria-hidden="true" onclick="like('${item._id}',false)"></i></span>  
                                 </div>
@@ -128,16 +129,23 @@
                 if (!exists) {
                     arr.push(id);
                     if (like) {
-                        $(`${id}like`).html(parseInt($(`${id}like`).html()) + 1);
+                        let count = parseInt($(`#${id}like`).html()) + 1;
+                        $(`#${id}like`).html(count);
                     } else {
-                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                        let count = parseInt($(`#${id}unlike`).html()) + 1;
+                        $(`#${id}unlike`).html(parseInt($(`#${id}unlike`).html()) + 1);
                     }
                 } else {
                     if (like) {
-                        $(`${id}like`).html(parseInt($(`${id}like`).html()) + 1);
-                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                        let count = parseInt($(`#${id}like`).html()) + 1;
+                        let count2 = parseInt($(`#${id}unlike`).html()) > 0 ? parseInt($(`#${id}unlike`).html()) - 1 : 0;
+                        $(`#${id}like`).html(count);
+                        $(`#${id}unlike`).html(count2);
                     } else {
-                        $(`${id}unlike`).html(parseInt($(`${id}unlike`).html()) + 1);
+                        let count = parseInt($(`#${id}unlike`).html()) + 1;
+                        let count2 = parseInt($(`#${id}like`).html()) > 0 ? parseInt($(`#${id}like`).html()) - 1 : 0;
+                        $(`#${id}unlike`).html(count);
+                        $(`#${id}like`).html(count2);
                     }
                 }
 
